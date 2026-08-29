@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VTH-StockPilot — Vietnam Portfolio Recommendation Platform</title>
+  <meta name="description" content="Explainable AI-powered stock recommendation platform for Vietnam’s HOSE market. Powered by 9-node LangGraph workflow, LightGBM cross-sectional ranking, and MLflow experiment tracking.">
+  <!-- Google Fonts — Inter with Vietnamese (Latin Extended) support -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&subset=latin,latin-ext,vietnamese" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+<!-- ── Topbar ─────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <a class="brand" href="/" aria-label="VTH-StockPilot home">
+    <span class="brand-mark">SP</span>
+    <strong>VTH-StockPilot</strong>
+    <small>INTELLIGENCE</small>
+  </a>
+  <nav aria-label="Primary navigation">
+    <button class="nav-item active" data-view="recommendations" id="nav-recommendations">Recommendations</button>
+    <button class="nav-item" data-view="portfolio" id="nav-portfolio">Portfolio</button>
+    <button class="nav-item" data-view="backtest" id="nav-backtest">Backtest</button>
+    <button class="nav-item" data-view="experiments" id="nav-experiments">Model Performance</button>
+
+  </nav>
+  <div class="system-status">
+    <span></span> MODEL <strong id="model-version">…</strong>
+    &nbsp;·&nbsp; Universe: <strong id="universe-size">–</strong>
+  </div>
+</header>
+
+<!-- ── Shell ──────────────────────────────────────────────────────────── -->
+<div class="shell">
+
+  <!-- ── Sidebar (Investor Profile) ─────────────────────────────────── -->
+  <aside class="sidebar" aria-label="Investor profile">
+    <div class="sidebar-title">
+      <h2>Investor Profile</h2>
+      <span class="step-badge">01</span>
+    </div>
+
+    <label>Investment Capital (VND)
+      <input id="capital" type="number" min="10000000" step="5000000" value="100000000">
+    </label>
+
+    <fieldset style="border:none">
+      <legend style="font-size:var(--fs-sm);font-weight:var(--fw-medium);color:var(--txt-secondary);margin-bottom:var(--sp-2)">Risk Mandate</legend>
+      <div class="segmented">
+        <input type="radio" name="risk" id="conservative" value="conservative">
+        <label for="conservative">Conservative</label>
+        <input type="radio" name="risk" id="balanced" value="balanced" checked>
+        <label for="balanced">Balanced</label>
+        <input type="radio" name="risk" id="growth" value="growth">
+        <label for="growth">Growth</label>
+      </div>
+    </fieldset>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)">
+      <label>Horizon
+        <select id="horizon">
+          <option value="6">6 months</option>
+          <option value="12" selected>12 months</option>
+          <option value="24">24 months</option>
+          <option value="36">36 months</option>
+        </select>
+      </label>
+      <label>Positions
+        <input id="positions" type="number" min="3" max="10" value="5">
+      </label>
+    </div>
+
+    <label>Max asset weight &nbsp;<output id="weight-output">30%</output>
+      <input id="max-weight" type="range" min="15" max="45" value="30">
+    </label>
+
+    <fieldset style="border:none">
+      <legend style="font-size:var(--fs-sm);font-weight:var(--fw-medium);color:var(--txt-secondary);margin-bottom:var(--sp-2)">Preferred Sectors</legend>
+      <div class="check-grid" id="sector-checks"></div>
+    </fieldset>
+
+    <label class="check-item" style="flex-direction:row;gap:var(--sp-2)">
+      <input type="checkbox" id="esg-filter">
+      <span style="color:var(--txt-secondary);font-size:var(--fs-sm)">ESG Filter</span>
+    </label>
+
+    <button id="generate-btn" class="btn btn-primary btn-full">
+      <span>Generate recommendation</span><b>→</b>
+    </button>
+
+    <div id="progress-wrap" class="progress-wrap">
+      <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">Preparing workflow…</div>
+    </div>
+
+    <hr class="divider">
+    <div style="font-size:var(--fs-xs);color:var(--txt-muted);line-height:var(--lh-relaxed)">
+      Data as of&nbsp;<strong id="as-of" style="color:var(--txt-secondary)">–</strong><br>
+      Model output for research purposes only; not financial advice.
+    </div>
+  </aside>
+
+  <!-- ── Main Content ────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- ════════════════════════════════════════════════════════════════
+         View 1 — Recommendations Ranking
+    ════════════════════════════════════════════════════════════════════ -->
+    <section class="view active" id="recommendations-view" aria-labelledby="reco-heading">
+      <div class="page-header">
+        <div>
+          <p class="eyebrow">PORTFOLIO INTELLIGENCE</p>
+          <h1 id="reco-heading">Recommendation Workspace</h1>
+          <p>Cross-sectional ranking with suitability and portfolio risk constraints via 9-node LangGraph workflow.</p>
+        </div>
+        <div class="as-of-badge">
+          <span>REGIME</span>
+          <span id="regime-badge" class="regime-badge neutral">NEUTRAL</span>
+        </div>
+      </div>
+
+      <!-- Metrics strip -->
+      <div class="metrics-grid">
+        <div class="metric-tile">
+          <span class="metric-label">Expected Return</span>
+          <span class="metric-value positive" id="metric-return">--</span>
+          <span class="metric-sublabel">annualised estimate</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-label">Expected Volatility</span>
+          <span class="metric-value" id="metric-volatility">--</span>
+          <span class="metric-sublabel">portfolio risk</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-label">Sharpe Ratio</span>
+          <span class="metric-value" id="metric-sharpe">--</span>
+          <span class="metric-sublabel">risk-adjusted</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-label">Sortino Ratio</span>
+          <span class="metric-value" id="metric-sortino">--</span>
+          <span class="metric-sublabel">downside risk</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-label">Diversification</span>
+          <span class="metric-value" id="metric-divs">--</span>
+          <span class="metric-sublabel">1 − HHI</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-label">Effective N</span>
+          <span class="metric-value" id="metric-eff-n">--</span>
+          <span class="metric-sublabel">diversification equiv.</span>
+        </div>
+      </div>
+
+      <!-- Ranked opportunities table -->
+      <div class="card">
+        <div class="card-header">
+          <div><p class="card-eyebrow">MODEL OUTPUT</p><h2>Ranked Opportunities</h2></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>RANK</th><th>SECURITY</th><th>SCORE</th>
+              <th>EXPECTED</th><th>RISK</th><th>WEIGHT</th><th>SIGNALS</th>
+            </tr></thead>
+            <tbody id="reco-tbody">
+              <tr class="empty-row"><td colspan="7">Set an investor profile and run the recommendation workflow.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Allocation + Audit -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">CONSTRUCTION</p><h2>Target Allocation</h2></div></div>
+          <div id="alloc-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">GOVERNANCE</p><h2>Decision Record</h2></div></div>
+          <dl id="audit" style="display:flex;flex-direction:column;gap:var(--sp-3);font-size:var(--fs-sm)">
+            <div><dt style="color:var(--txt-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.8px">Recommendation ID</dt><dd style="color:var(--txt-secondary)">--</dd></div>
+            <div><dt style="color:var(--txt-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.8px">Model Version</dt><dd style="color:var(--txt-secondary)">--</dd></div>
+            <div><dt style="color:var(--txt-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.8px">Risk Mandate</dt><dd style="color:var(--txt-secondary)">--</dd></div>
+            <div><dt style="color:var(--txt-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.8px">Data As Of</dt><dd style="color:var(--txt-secondary)">--</dd></div>
+            <div><dt style="color:var(--txt-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.8px">Pipeline Nodes</dt><dd style="color:var(--txt-secondary)">--</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Signal breakdown + SHAP explanations -->
+      <div class="card">
+        <div class="card-header"><div><p class="card-eyebrow">EXPLAINABILITY</p><h2>Signal Breakdown & SHAP</h2></div></div>
+        <div id="explanations"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         View 2 — Portfolio Builder + Risk Analysis
+    ════════════════════════════════════════════════════════════════════ -->
+    <section class="view" id="portfolio-view" aria-labelledby="portfolio-heading">
+      <div class="page-header">
+        <div><p class="eyebrow">PORTFOLIO CONSTRUCTION</p><h1 id="portfolio-heading">Portfolio Builder</h1>
+          <p>Optimise portfolio weights and analyse risk analytics.</p></div>
+        <button id="build-portfolio-btn" class="btn btn-primary">Build Portfolio</button>
+      </div>
+      <div id="portfolio-error" style="display:none;padding:var(--sp-3);background:var(--clr-negative-dim);border-radius:var(--r-sm);color:var(--clr-negative);font-size:var(--fs-sm)"></div>
+
+      <!-- Portfolio metrics -->
+      <div class="metrics-grid">
+        <div class="metric-tile"><span class="metric-label">Expected Return</span><span class="metric-value positive" id="pb-return">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Volatility</span><span class="metric-value" id="pb-vol">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Sharpe</span><span class="metric-value" id="pb-sharpe">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Sortino</span><span class="metric-value" id="pb-sortino">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Diversification</span><span class="metric-value" id="pb-divs">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Effective N</span><span class="metric-value" id="pb-eff-n">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Max DD Est.</span><span class="metric-value negative" id="pb-maxdd">--</span></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:var(--sp-4)">
+        <!-- Positions table -->
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">POSITIONS</p><h2>Portfolio Holdings</h2></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>SECURITY</th><th>SECTOR</th><th>WEIGHT</th><th>ALLOCATION</th><th>EXP RETURN</th><th>VOLATILITY</th><th>BETA</th></tr></thead>
+              <tbody id="portfolio-tbody">
+                <tr class="empty-row"><td colspan="7">Build a portfolio to see holdings.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sector donut -->
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">SECTOR EXPOSURE</p><h2>Allocation</h2></div></div>
+          <canvas id="sector-donut" style="width:100%;height:200px"></canvas>
+          <div id="sector-legend" style="margin-top:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-2)"></div>
+        </div>
+      </div>
+
+      <!-- Risk analysis -->
+      <div class="card">
+        <div class="card-header"><div><p class="card-eyebrow">RISK ANALYTICS</p><h2>Risk Analysis</h2></div></div>
+        <div class="metrics-grid" style="margin-bottom:var(--sp-5)">
+          <div class="metric-tile"><span class="metric-label">VaR 95% (1M)</span><span class="metric-value negative" id="ra-var95">--</span></div>
+          <div class="metric-tile"><span class="metric-label">CVaR 95% (1M)</span><span class="metric-value negative" id="ra-cvar95">--</span></div>
+          <div class="metric-tile"><span class="metric-label">Effective N</span><span class="metric-value" id="ra-eff-n">--</span></div>
+          <div class="metric-tile"><span class="metric-label">Max DD Est.</span><span class="metric-value negative" id="ra-maxdd">--</span></div>
+        </div>
+        <div><p class="card-eyebrow" style="margin-bottom:var(--sp-3)">CORRELATION MATRIX</p>
+          <div id="corr-matrix" style="overflow-x:auto"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         View 3 — Historical Backtest
+    ════════════════════════════════════════════════════════════════════ -->
+    <section class="view" id="backtest-view" aria-labelledby="backtest-heading">
+      <div class="page-header">
+        <div><p class="eyebrow">WALK-FORWARD EVALUATION</p><h1 id="backtest-heading">Strategy Backtest</h1>
+          <p>Point-in-time simulation with transaction costs. No look-ahead bias.</p></div>
+      </div>
+
+      <!-- Controls -->
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:var(--sp-4);align-items:end">
+          <label>Evaluation window
+            <select id="backtest-months">
+              <option value="12">12 months</option>
+              <option value="24" selected>24 months</option>
+              <option value="36">36 months</option>
+              <option value="60">60 months</option>
+            </select>
+          </label>
+          <label>Rebalance frequency
+            <select id="backtest-freq">
+              <option value="weekly">Weekly</option>
+              <option value="monthly" selected>Monthly</option>
+              <option value="quarterly">Quarterly</option>
+            </select>
+          </label>
+          <label>Transaction cost (bps)
+            <input id="backtest-tcost" type="number" min="0" max="100" value="10">
+          </label>
+          <button id="run-backtest-btn" class="btn btn-primary">Run backtest</button>
+        </div>
+        <div id="bt-progress-wrap" class="progress-wrap" style="margin-top:var(--sp-4)">
+          <div class="progress-track"><div id="bt-progress-fill" class="progress-fill"></div></div>
+          <div class="progress-label" id="bt-progress-label">Initialising…</div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-tile"><span class="metric-label">Annualised Return</span><span class="metric-value positive" id="bt-return">--</span><span class="metric-sublabel">after costs</span></div>
+        <div class="metric-tile"><span class="metric-label">Benchmark</span><span class="metric-value" id="bt-benchmark">--</span><span class="metric-sublabel">VNINDEX annualised</span></div>
+        <div class="metric-tile"><span class="metric-label">Volatility</span><span class="metric-value" id="bt-vol">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Sharpe</span><span class="metric-value" id="bt-sharpe">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Sortino</span><span class="metric-value" id="bt-sortino">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Max Drawdown</span><span class="metric-value negative" id="bt-drawdown">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Hit Rate</span><span class="metric-value" id="bt-hit">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Calmar</span><span class="metric-value" id="bt-calmar">--</span></div>
+        <div class="metric-tile"><span class="metric-label">Info Ratio</span><span class="metric-value" id="bt-ir">--</span></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="card">
+        <div class="card-header">
+          <div><p class="card-eyebrow">CUMULATIVE PERFORMANCE</p><h2>Equity Curve</h2></div>
+          <div style="display:flex;gap:var(--sp-4);font-size:var(--fs-xs)">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:2px;background:#3b82f6;display:inline-block"></span>Portfolio</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:2px;background:#64748b;display:inline-block;border-top:2px dashed #64748b;height:0"></span>Benchmark</span>
+          </div>
+        </div>
+        <div class="chart-container"><canvas id="equity-chart"></canvas></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">DRAWDOWN</p><h2>Underwater Curve</h2></div></div>
+          <div class="chart-container" style="height:200px"><canvas id="drawdown-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><p class="card-eyebrow">ROLLING 12M</p><h2>Rolling Sharpe</h2></div></div>
+          <div class="chart-container" style="height:200px"><canvas id="rolling-sharpe-chart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         View 4 — Model Performance (Experiments)
+    ════════════════════════════════════════════════════════════════════ -->
+    <section class="view" id="experiments-view" aria-labelledby="experiments-heading">
+      <div class="page-header">
+        <div><p class="eyebrow">MLFLOW TRACKING</p><h1 id="experiments-heading">Model Performance</h1>
+          <p>Champion / challenger model comparison, validation metrics, and experiment runs.</p></div>
+      </div>
+
+      <!-- Data freshness -->
+      <div class="card">
+        <div class="card-header"><div><p class="card-eyebrow">DATA & MODEL FRESHNESS</p><h2>System Health</h2></div></div>
+        <div id="freshness-panel"><div class="skeleton" style="height:80px"></div></div>
+      </div>
+
+      <!-- Champion / Challenger -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+        <div class="card" id="champion-card"><div class="skeleton" style="height:240px"></div></div>
+        <div class="card" id="challenger-card"><div class="skeleton" style="height:240px"></div></div>
+      </div>
+
+      <!-- All experiments table -->
+      <div class="card">
+        <div class="card-header"><div><p class="card-eyebrow">EXPERIMENT RUNS</p><h2>Run History</h2></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>RUN ID</th><th>STAGE</th><th>MODEL</th>
+              <th data-tooltip="Normalised Discounted Cumulative Gain">NDCG</th>
+              <th data-tooltip="Precision at top 5">PREC@5</th>
+              <th data-tooltip="Spearman Rank IC">RANK IC</th>
+              <th>SHARPE</th><th>MAX DD</th><th>DATE</th>
+            </tr></thead>
+            <tbody id="experiments-tbody">
+              <tr class="empty-row"><td colspan="9">Loading experiments…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+
+  </main><!-- /.main-content -->
+</div><!-- /.shell -->
+
+<footer style="text-align:center;padding:var(--sp-4);font-size:var(--fs-xs);color:var(--txt-muted);border-top:1px solid var(--clr-border)">
+  VTH-StockPilot · Research environment · Model outputs are not financial advice.
+</footer>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

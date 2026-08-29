@@ -1,0 +1,211 @@
+{
+  "tickers": [
+    "VCB",
+    "BID",
+    "MBB",
+    "TCB",
+    "VPB",
+    "ACB",
+    "FPT",
+    "VIC",
+    "VHM",
+    "HPG",
+    "VNM",
+    "SAB",
+    "GAS",
+    "MSN",
+    "REE"
+  ],
+  "start": "2024-08-08",
+  "end": "2026-08-08",
+  "years": 2.0,
+  "fetched_at": "2026-08-08",
+  "api": "vnstock.api (v4.x)",
+  "results": {
+    "VCB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\VCB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\VCB_ratios.parquet"
+      }
+    },
+    "BID": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\BID_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\BID_ratios.parquet"
+      }
+    },
+    "MBB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\MBB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\MBB_ratios.parquet"
+      }
+    },
+    "TCB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\TCB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 3,
+        "skipped": true,
+        "path": "data\\raw\\TCB_ratios.parquet"
+      }
+    },
+    "VPB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\VPB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\VPB_ratios.parquet"
+      }
+    },
+    "ACB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\ACB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\ACB_ratios.parquet"
+      }
+    },
+    "FPT": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\FPT_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\FPT_ratios.parquet"
+      }
+    },
+    "VIC": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\VIC_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\VIC_ratios.parquet"
+      }
+    },
+    "VHM": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\VHM_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 3,
+        "skipped": true,
+        "path": "data\\raw\\VHM_ratios.parquet"
+      }
+    },
+    "HPG": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\HPG_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\HPG_ratios.parquet"
+      }
+    },
+    "VNM": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\VNM_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\VNM_ratios.parquet"
+      }
+    },
+    "SAB": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\SAB_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\SAB_ratios.parquet"
+      }
+    },
+    "GAS": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\GAS_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\GAS_ratios.parquet"
+      }
+    },
+    "MSN": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\MSN_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\MSN_ratios.parquet"
+      }
+    },
+    "REE": {
+      "ohlcv": {
+        "rows": 523,
+        "skipped": true,
+        "path": "data\\raw\\REE_ohlcv.parquet"
+      },
+      "ratios": {
+        "rows": 4,
+        "skipped": true,
+        "path": "data\\raw\\REE_ratios.parquet"
+      }
+    }
+  },
+  "benchmark": {
+    "rows": 523,
+    "skipped": true,
+    "path": "data\\raw\\vnindex_ohlcv.parquet"
+  }
+}

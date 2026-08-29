@@ -1,0 +1,1 @@
+"""VTH-StockPilot recommendation platform."""

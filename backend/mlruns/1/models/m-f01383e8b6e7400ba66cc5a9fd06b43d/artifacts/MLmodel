@@ -1,0 +1,43 @@
+artifact_path: file:///C:/Users/Hung/Desktop/VScodeproject/LLM_RAG_projects/VTHStockPilot/backend/mlruns/1/models/m-f01383e8b6e7400ba66cc5a9fd06b43d/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.11.15
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.14.0
+model_id: m-f01383e8b6e7400ba66cc5a9fd06b43d
+model_size_bytes: 1252087
+model_uuid: m-f01383e8b6e7400ba66cc5a9fd06b43d
+prompts: null
+run_id: 912d7ba66e154da6bb299fa082ddac69
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "double", "name": "momentum", "required": true}, {"type": "double",
+    "name": "quality", "required": true}, {"type": "double", "name": "value", "required":
+    true}, {"type": "double", "name": "sentiment", "required": true}, {"type": "double",
+    "name": "volatility", "required": true}, {"type": "double", "name": "liquidity_score",
+    "required": true}, {"type": "double", "name": "pe_ratio", "required": true}, {"type":
+    "double", "name": "pb_ratio", "required": true}, {"type": "double", "name": "roe",
+    "required": true}, {"type": "double", "name": "debt_to_equity", "required": true},
+    {"type": "double", "name": "revenue_growth", "required": true}, {"type": "double",
+    "name": "rsi", "required": true}, {"type": "double", "name": "beta", "required":
+    true}, {"type": "double", "name": "momentum_3m", "required": true}]'
+  outputs: '[{"type": "double", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-08-08 03:38:27.276281'

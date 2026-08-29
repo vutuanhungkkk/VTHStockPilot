@@ -1,0 +1,101 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VTH-StockPilot — Design Tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Colour Palette ─────────────────────────────────────────────────── */
+  --clr-bg-900: #080c14;
+  --clr-bg-800: #0d1420;
+  --clr-bg-700: #121b2e;
+  --clr-bg-600: #182338;
+  --clr-bg-500: #1e2d45;
+
+  --clr-surface: #0f1a2b;
+  --clr-surface-2: #162236;
+  --clr-surface-3: #1c2e45;
+
+  --clr-border: rgba(99, 172, 255, 0.12);
+  --clr-border-bright: rgba(99, 172, 255, 0.25);
+
+  /* Brand gradient */
+  --clr-accent-a: #3b82f6;   /* blue */
+  --clr-accent-b: #6366f1;   /* indigo */
+  --clr-accent-c: #8b5cf6;   /* violet */
+  --grad-brand: linear-gradient(135deg, var(--clr-accent-a), var(--clr-accent-c));
+  --grad-brand-subtle: linear-gradient(135deg,
+    rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+
+  /* Semantic */
+  --clr-positive: #10d070;
+  --clr-positive-dim: rgba(16, 208, 112, 0.15);
+  --clr-negative: #f43f5e;
+  --clr-negative-dim: rgba(244, 63, 94, 0.15);
+  --clr-warning: #f59e0b;
+  --clr-warning-dim: rgba(245, 158, 11, 0.15);
+  --clr-neutral: #64748b;
+
+  /* Text */
+  --txt-primary: #e8edf7;
+  --txt-secondary: #8da4c4;
+  --txt-muted: #4d6380;
+  --txt-accent: #7ab4ff;
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', 'SF Pro Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --fs-xs:   0.688rem;   /* 11px */
+  --fs-sm:   0.75rem;    /* 12px */
+  --fs-base: 0.875rem;   /* 14px */
+  --fs-md:   1rem;       /* 16px */
+  --fs-lg:   1.125rem;   /* 18px */
+  --fs-xl:   1.375rem;   /* 22px */
+  --fs-2xl:  1.75rem;    /* 28px */
+  --fs-3xl:  2.25rem;    /* 36px */
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold: 600;
+  --fw-bold:   700;
+
+  --lh-tight: 1.2;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  /* ── Spacing (8px grid) ─────────────────────────────────────────────── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Radius ─────────────────────────────────────────────────────────── */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  16px;
+  --r-xl:  24px;
+  --r-full: 9999px;
+
+  /* ── Elevation (box-shadow) ─────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+  --shadow-glow: 0 0 24px rgba(59,130,246,0.2);
+
+  /* ── Transitions ────────────────────────────────────────────────────── */
+  --t-fast:   150ms ease;
+  --t-normal: 250ms ease;
+  --t-slow:   400ms ease;
+
+  /* ── Z-index ────────────────────────────────────────────────────────── */
+  --z-base:    1;
+  --z-overlay: 100;
+  --z-modal:   200;
+  --z-toast:   300;
+}

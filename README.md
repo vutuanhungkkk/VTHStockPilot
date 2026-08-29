@@ -1,62 +1,203 @@
-# Personalized Stock Portfolio Recommendation Platform
+# VTH-StockPilot — Vietnam Portfolio Recommendation Platform
 
-<!-- ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white) -->
-![Django](https://img.shields.io/badge/DJANGO-092E20?style=for-the-badge&logo=django)
-![React](https://img.shields.io/badge/react-444444?style=for-the-badge&logo=react)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-7C3AED?style=for-the-badge&logo=python&logoColor=white)
+![LightGBM](https://img.shields.io/badge/LightGBM-02A88E?style=for-the-badge&logo=python&logoColor=white)
+![MLflow](https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon%20aws&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white)
-![Github Action](https://github.com/Nam-gu/Stock-platform/actions/workflows/test-build.yml/badge.svg)
-[![codecov](https://codecov.io/gh/Nam-gu/Stock-platform/branch/main/graph/badge.svg?token=9Q1TXUD1ZB)](https://codecov.io/gh/Nam-gu/Stock-platform)
+![GitHub Actions](https://github.com/Nam-gu/Stock-platform/actions/workflows/test-build.yml/badge.svg)
 
-개인 맞춤형 주식 포트폴리오 추천 플랫폼 
+Personalized stock portfolio recommendation platform for the Vietnamese stock market (HOSE/HNX/UPCOM).
 
+---
 
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<img src="https://user-images.githubusercontent.com/28288186/233266865-c10ae364-06bd-4b04-ad91-fa9f18b905aa.png" width="80%" height="80%">
+### Overview
 
-### 개요
-* 주식 시장에서 다양한 정보를 수집하고 이를 투자에 어떻게 활용하는지는 중요하다. 양질의 정보를 제공하기 위해 웹플랫폼을 개발하여 서비스한다.
-* 사람의 심리를 고려한 지표를 제공함으로써 시장 참여자들의 심리를 파악하는데 도움을 줄 수 있다.
-* 심리를 반영할 수 있는 감성분석 지표, 기존의 재무제표 지표들을 바탕으로 개인 맞춤 포트폴리오를 추천해준다.
+* Collects and analyzes Vietnamese stock data from HOSE via the **vnstock3** library, providing multi-dimensional information for investors.
+* Implements a **LangGraph** 9-node agentic pipeline for explainable portfolio recommendations: data quality → market regime → fundamental analysis → forecast → customer preference → risk compliance → ranking → portfolio optimizer → explanation.
+* Uses **LightGBM** cross-sectional ranking with SHAP values to explain the reasoning behind each stock selection (Explainable AI).
+* Tracks and compares ML models via **MLflow** experiment tracking.
 
-### Intro
-* It is important to collect various information from the stock market and use it for investment. Web platforms are developed and serviced to provide quality information.
-* It can help to grasp the psychology of market participants by providing indicators that consider human psychology.
-* Based on emotional analysis indicators that can reflect psychology and existing financial statements indicators, personalized portfolios are recommended.
+---
 
+## System Architecture
 
-<!-- ABOUT System Configuration -->
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       VTH-StockPilot                        │
+│                    Vietnam Market Edition                    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+        ┌──────────────▼──────────────┐
+        │   Frontend (Vanilla JS)      │
+        │   HOSE universe · VND units  │
+        └──────────────┬──────────────┘
+                       │ REST / WebSocket
+        ┌──────────────▼──────────────┐
+        │   Backend (FastAPI)          │
+        │   LangGraph 9-node workflow  │
+        │   LightGBM + SHAP ranking    │
+        └──────┬───────────────┬──────┘
+               │               │
+  ┌────────────▼─────┐  ┌──────▼───────────┐
+  │ Database (SQLite/ │  │  MLflow Tracking  │
+  │ PostgreSQL prod)  │  │  (Experiment log) │
+  └────────────┬─────┘  └──────────────────┘
+               │
+  ┌────────────▼─────────────────────────────┐
+  │  vnstock3 — Vietnamese Market Data        │
+  │  HOSE · HNX · UPCOM · VN30 · VN100       │
+  └──────────────────────────────────────────┘
+```
+
+---
+
 ## System Configuration
 
-<img src="https://user-images.githubusercontent.com/28288186/233267215-c148203e-f9b3-45e1-8130-fc21bb29f49d.png" width="90%" height="90%">
+| Component  | Tools                        | Description |
+|:----------:|:----------------------------:|-------------|
+| Frontend   | Vanilla JS / CSS / Chart.js  | 5 views: Recommendations, Portfolio, Backtest, Model Performance, Preferences. Displays portfolio in VND units (bil/mil). |
+| Backend    | FastAPI + LangGraph          | 9-node agentic pipeline. 5 REST routes + WebSocket streaming. Cross-sectional ML ranking (LightGBM + SHAP). |
+| Market Data | vnstock3                    | HOSE real-time data. Demo mode: 15 VN30 blue-cap stocks (VCB, FPT, HPG, VIC, VNM...). |
+| Database   | SQLite (dev) / PostgreSQL (prod) | Saves portfolio states, recommendation history. SQLAlchemy async + Alembic migrations. |
+| ML         | LightGBM / scikit-learn / SHAP | Walk-forward cross-sectional ranking. SHAP explainability for each stock. |
+| Experiments | MLflow                      | Tracking champion/challenger models. Metrics: NDCG, RankIC, Precision@K, Sharpe. |
+| CI/CD      | GitHub Actions / AWS CodeDeploy | Automated testing and deployment. |
 
+---
 
-|   구성    |  Tools  |설명|
-|:---------:|:------:|---|
-| Frontend | React  |사용자들이 원하는 지표(감성분석, PER, PBR, EPS 등)에 맞춰 동일 비중 포트폴리오(Equally Weighted Portfolio)와 가치 가중 포트폴리오(Value Weighted Portfolio)를 제공한다.|
-|Backend   | Django REST framework |7개의 API를 제공한다. 실시간 주가, 예상 주가, 네이버 증권 종목토론실을 KR-Finbert를 이용해 분석한 데이터, 재무제표, 토론방 등 여러 데이터를 Front-end에서 사용할 수 있다.|
-|DB         | RDS(MySQL) | 주식 별 토론방의 데이터를 저장한다.|
-|CI/CD      | GitHub Actions / AWS CodeDeploy | 테스트와 배포를 자동화한다.|
+## Vietnamese Market Universe (Demo)
 
+| Symbol | Company | Exchange | Sector |
+|--------|---------|-----|-------|
+| VCB    | Vietcombank | HOSE | Banking |
+| BID    | BIDV | HOSE | Banking |
+| MBB    | MB Bank | HOSE | Banking |
+| TCB    | Techcombank | HOSE | Banking |
+| VPB    | VPBank | HOSE | Banking |
+| ACB    | Asia Commercial Bank | HOSE | Banking |
+| FPT    | FPT Corporation | HOSE | Technology |
+| VIC    | Vingroup | HOSE | Real Estate |
+| VHM    | Vinhomes | HOSE | Real Estate |
+| HPG    | Hoa Phat Group | HOSE | Materials |
+| VNM    | Vinamilk | HOSE | Consumer |
+| SAB    | Sabeco | HOSE | Consumer |
+| GAS    | PetroVietnam Gas | HOSE | Energy |
+| MSN    | Masan Group | HOSE | Consumer |
+| REE    | REE Corporation | HOSE | Industrials |
 
-<!-- ABOUT Web Site -->
+---
+
+## LangGraph Workflow (9 Nodes)
+
+```
+data_quality
+    │
+    ▼
+market_regime       ← Classifies bull / bear / high_volatility / neutral
+    │
+    ▼
+fundamental         ← Scores ROE, P/E, P/B, revenue growth
+    │
+    ▼
+forecast            ← Predicts excess return using cross-sectional ranking
+    │
+    ▼
+customer_preference ← Adjusts based on preferred sectors, ESG
+    │
+    ▼
+risk_compliance     ← Filters by volatility, D/E, suitability
+    │
+    ▼
+ranking             ← LightGBM + SHAP scoring
+    │
+    ▼
+portfolio_optimizer ← Mean-variance optimization, sets position limits
+    │
+    ▼
+explanation         ← Synthesizes key drivers, risk flags, SHAP contributions
+```
+
+---
+
 ## Platform Features
-### 1. 메인 페이지
 
-<img width="45%" height="45%" src="https://user-images.githubusercontent.com/28288186/233275586-0ec8c99f-9a98-4261-9b69-25c75d945760.png"> <img width="46%" height="46%" src="https://user-images.githubusercontent.com/28288186/233275615-c453b8be-fe6b-42bd-9ce0-fc5d2d6bf352.png">
+### 1. Recommendations View
+* Input investor profile: capital (VND), risk appetite, horizon, preferred sectors.
+* Click **Generate recommendation** → 9-node pipeline runs, showing real-time progress via WebSocket.
+* Results: ranked stocks + portfolio allocation + SHAP explanation.
 
-* 여러 지표들(감성분석, BPS, PER, PBR, EPS, DIV, DPS) 중에서 사용자가 원하는 지표에 따라 해당 버튼을 클릭하면 포트폴리오를 제공한다.
-* 포트폴리오 아래에서는 구체적인 기업별 정보를 제공한다.    
+### 2. Portfolio Builder
+* Customize portfolio weights manually or follow recommendations.
+* Displays Value-at-Risk (VaR 95%), Sortino ratio, and correlation matrix.
 
-### 2. 기업별 세부정보 페이지
-<img width="48%" height="48%" src="https://user-images.githubusercontent.com/28288186/233276453-a9364380-632c-406c-86e0-5d2593838bdb.png"> <img width="45%" height="45%" src="https://user-images.githubusercontent.com/28288186/233277131-e4f13a45-a3ae-4b2f-a8e0-11676d69312f.png">
+### 3. Backtest
+* Walk-forward simulation with transaction costs (bps).
+* Benchmark: **VNINDEX**.
+* Charts: equity curve, underwater curve, rolling Sharpe.
 
-* 기업별 정보에서 구체적으로 보고 싶은 기업을 클릭하면 세부 정보 페이지로 이동한다.
-* 현재 주가와 예상 주가를 확인할 수 있다.
-* 주가 데이터와 네이버증권 종목토론실을 KR-Finbert를 이용해 감성분석한 데이터를 LSTM을 이용해 학습한 모델을 통해 예상주가를 제공한다.
-> 모델은 아래 사이트에서 확인할 수 있다.    
-> <https://github.com/Nam-gu/Personalized-stock-portfolio-model>   
-* 재무제표, 네이버 종목토론실 실시간 감성분석, 토론방 기능을 제공한다.
+### 4. Model Performance
+* View MLflow experiments history: NDCG, RankIC, Precision@K.
+* Compare champion (LightGBM) vs challenger (HistGBM).
 
+### 5. Preferences
+* Record stock feedback to personalize future recommendations.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend API** | FastAPI 0.115, Uvicorn, Pydantic v2 |
+| **Agentic Workflow** | LangGraph 0.2, LangChain Core |
+| **ML** | LightGBM 4.5, scikit-learn, SHAP |
+| **Experiment Tracking** | MLflow 2.16 |
+| **Database** | SQLAlchemy 2.0 (async), Alembic, PostgreSQL / SQLite |
+| **Cache** | Redis 5.1 |
+| **Market Data** | vnstock3 (HOSE/HNX/UPCOM) |
+| **Frontend** | Vanilla HTML/CSS/JS, Chart.js |
+| **Scheduling** | APScheduler, Celery (optional heavy workers) |
+| **Infra** | Docker, AWS EC2 + CodeDeploy, GitHub Actions |
+
+---
+
+## Quick Start
+
+### Requirements
+```bash
+pip install -r backend/requirements-fastapi.txt
+# Optional: live market data
+pip install vnstock3
+```
+
+### Run (Development)
+```bash
+# Backend
+cd backend
+uvicorn app.main:app --reload --port 8000
+
+# Or with Docker Compose
+docker compose up
+```
+
+### Environment Variables
+```env
+STOCK_DATABASE_URL=sqlite+aiosqlite:///./vth_stockpilot.db
+STOCK_USE_REAL_MARKET_DATA=false          # true → vnstock live
+STOCK_MARKET_DATA_SOURCE=demo             # demo | vnstock
+STOCK_VNSTOCK_MARKET=HOSE
+STOCK_RISK_FREE_RATE=0.045                # 4.5% — 5-year VN Govt Bond
+STOCK_LLM_PROVIDER=template              # template | openai | gemini
+STOCK_OPENAI_API_KEY=sk-...
+```
+
+---
+
+## Related
+
+* **ML Model Repository**: https://github.com/Nam-gu/Personalized-stock-portfolio-model
+* **vnstock3 docs**: https://docs.vnstock.site

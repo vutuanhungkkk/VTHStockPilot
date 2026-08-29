@@ -1,0 +1,66 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.fastapi
+    environment:
+      STOCK_MLFLOW_TRACKING_URI: http://mlflow:5000
+      STOCK_DATABASE_URL: postgresql+asyncpg://stockpilot:stockpilot@postgres:5432/stockpilot
+      STOCK_DATABASE_URL_SYNC: postgresql://stockpilot:stockpilot@postgres:5432/stockpilot
+      STOCK_REDIS_URL: redis://redis:6379/0
+      STOCK_ENVIRONMENT: production
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mlflow:
+        condition: service_started
+    restart: unless-stopped
+
+  mlflow:
+    image: python:3.12-slim
+    command: >-
+      sh -c "pip install mlflow psycopg2-binary -q &&
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri postgresql://stockpilot:stockpilot@postgres:5432/mlflow
+      --default-artifact-root /data/artifacts"
+    volumes:
+      - mlflow-data:/data/artifacts
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: stockpilot
+      POSTGRES_PASSWORD: stockpilot
+      POSTGRES_MULTIPLE_DATABASES: stockpilot,mlflow
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sh:/docker-entrypoint-initdb.d/init-postgres.sh
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockpilot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  mlflow-data:
